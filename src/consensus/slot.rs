@@ -1,7 +1,7 @@
 use crate::state::chain_state::ChainState;
 use crate::types::block::Block;
 use crate::consensus::leader_selection::select_leader;
-use crate::state::bucket_ops::move_ticket;
+use crate::state::bucket_ops::{any_muted_bucket, move_all_validator_tickets_to_bucket};
 use crate::types::validator::ValidatorState;
 
 pub fn process_slot(
@@ -81,41 +81,20 @@ fn should_liveness_slash(prev: u32, now: u32) -> bool {
 fn apply_liveness_slash(state: &mut ChainState, validator_id: u64) {
     let val = state.validators.get_mut(&validator_id).unwrap();
 
+    // 5% slash
     let slash_amount = val.vault_balance / 20;
     val.vault_balance -= slash_amount;
 
     println!(
-        "!!! LIVENESS SLASH: validator {} slashed by 5%, new vault = {} !!!",
+        "!!!  LIVENESS SLASH: validator {} slashed by 5%, new vault = {} !!!",
         validator_id, val.vault_balance
     );
 
-    // Enforce vault invariant
-    let required = val.initial_bond; // placeholder rule for now
-    if val.vault_balance < required && val.state == ValidatorState::Active {
-        println!(
-            "!!! Validator {} entering PAUSED_LOW_VAULT (vault below minimum) !!!",
-            validator_id
-        );
+    // Enter cooldown for 1 epoch
+    val.state = ValidatorState::PunishedCooldown;
+    val.cooldown_until_epoch = Some(state.epoch_index + 2);
 
-        val.state = ValidatorState::PausedLowVault;
-
-        // Move all owned tickets to MUTED buckets
-        let muted_bucket = *state
-            .muted_bucket_ids
-            .iter()
-            .next()
-            .expect("No MUTED bucket defined");
-
-        let ticket_ids: Vec<u64> = state
-            .tickets
-            .values()
-            .filter(|t| t.owner == validator_id)
-            .map(|t| t.id)
-            .collect();
-
-        for tid in ticket_ids {
-            let from = state.tickets.get(&tid).unwrap().bucket;
-            move_ticket(state, tid, from, muted_bucket);
-        }
-    }
+    // Move tickets to MUTED immediately
+    let muted_bucket = any_muted_bucket(state);
+    move_all_validator_tickets_to_bucket(state, validator_id, muted_bucket);
 }

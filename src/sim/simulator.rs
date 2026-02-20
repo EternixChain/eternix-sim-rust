@@ -2,11 +2,13 @@ use crate::state::chain_state::ChainState;
 use crate::types::block::Block;
 use crate::sim::clock::SimClock;
 use crate::consensus::slot::process_slot;
+use crate::consensus::epoch::process_epoch_transition;
 
 pub struct Simulator {
     pub clock: SimClock,
     pub state: ChainState,
     pub blocks: Vec<Block>,
+    pub epoch_len_slots: u64,
 }
 
 impl Simulator {
@@ -30,6 +32,10 @@ impl Simulator {
         self.clock.slot_index += 1;
         self.clock.slot_start_ms += 3_000;
         self.clock.now_ms = self.clock.slot_start_ms;
+
+        if self.clock.slot_index % self.epoch_len_slots == 0 {
+            process_epoch_transition(&mut self.state);
+        }
 
         block
     }

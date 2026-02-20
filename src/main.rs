@@ -6,6 +6,7 @@ use eternix_sim::state::chain_state::ChainState;
 use eternix_sim::types::validator::{Validator, ValidatorState};
 use eternix_sim::types::ticket::Ticket;
 use eternix_sim::types::bucket::Bucket;
+use eternix_sim::state::validator_ops::{on_vault_refill};
 
 fn main() {
     // --- Genesis validator ---
@@ -128,10 +129,19 @@ fn main() {
         clock,
         state,
         blocks: Vec::new(),
+        epoch_len_slots: 10,
     };
 
     // --- Run a few slots ---
     for _ in 0..50 {
+        let current_slot = sim.clock.slot_index;
+
+        //Inject refill at specific block
+        if current_slot == 25 {
+            println!(">>> Injecting refill at slot {}", current_slot);
+            on_vault_refill(&mut sim.state, 1, 50_000u128);
+        }
+
         let block = sim.run_one_slot();
 
         let v1 = sim.state.validators.get(&1).unwrap();

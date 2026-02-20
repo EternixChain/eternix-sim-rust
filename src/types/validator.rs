@@ -9,7 +9,7 @@ pub struct Validator {
     pub cooldown_until_epoch: Option<u64>,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum ValidatorState {
     Active,
     PausedLowVault,
