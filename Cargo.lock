@@ -48,7 +48,7 @@ dependencies = [
 
 [[package]]
 name = "eternix-sim"
-version = "0.1.0"
+version = "0.3.6"
 dependencies = [
  "sha2",
 ]

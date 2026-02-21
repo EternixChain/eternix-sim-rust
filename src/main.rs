@@ -1,4 +1,4 @@
-use std::collections::{HashMap, HashSet};
+use std::collections::{HashMap, HashSet, BTreeMap};
 
 use eternix_sim::sim::clock::SimClock;
 use eternix_sim::sim::simulator::Simulator;
@@ -6,7 +6,9 @@ use eternix_sim::state::chain_state::ChainState;
 use eternix_sim::types::validator::{Validator, ValidatorState};
 use eternix_sim::types::ticket::Ticket;
 use eternix_sim::types::bucket::Bucket;
-use eternix_sim::state::validator_ops::{on_vault_refill};
+use eternix_sim::types::ticket::TicketState;
+use eternix_sim::state::retirement_ops::request_ticket_retire;
+// use eternix_sim::state::validator_ops::{on_vault_refill};
 
 fn main() {
     // --- Genesis validator ---
@@ -73,6 +75,9 @@ fn main() {
             owner: validator1_id,
             bucket: active_bucket_id,
             creation_epoch: 0,
+            state: TicketState::Active,
+            retire_requested_epoch: None,
+            retire_effective_epoch: None,
         },
     );
     tickets.insert(
@@ -82,6 +87,9 @@ fn main() {
             owner: validator2_id,
             bucket: active_bucket_id,
             creation_epoch: 0,
+            state: TicketState::Active,
+            retire_requested_epoch: None,
+            retire_effective_epoch: None,
         },
     );
 
@@ -117,6 +125,10 @@ fn main() {
         epoch_index: 0,
         sub_epoch_index: 0,
         epoch_seed: [7u8; 32],
+
+        retire_per_epoch_limit: 2,
+        retire_schedule: BTreeMap::new(),
+        retire_finalize: BTreeMap::new(),
     };
 
     let clock = SimClock {
@@ -132,6 +144,9 @@ fn main() {
         epoch_len_slots: 10,
     };
 
+    request_ticket_retire(&mut sim.state, 1, vec![1]);
+    println!("{:?}", sim.state.retire_schedule);
+
     // --- Run a few slots ---
     for _ in 0..50 {
 //        let current_slot = sim.clock.slot_index;
@@ -139,7 +154,10 @@ fn main() {
         // Inject at specific block
 //        if current_slot == 25 {
 //            on_vault_refill(&mut sim.state, 1, 50_000u128);
+//            println!(50,000 refilled to Validator 1)
 //        }
+
+        
 
         let block = sim.run_one_slot();
 

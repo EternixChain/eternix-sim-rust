@@ -1,4 +1,4 @@
-use std::collections::{HashMap, HashSet};
+use std::collections::{HashMap, HashSet, BTreeMap};
 
 use crate::types::{validator::Validator, ticket::Ticket, bucket::Bucket};
 
@@ -16,4 +16,12 @@ pub struct ChainState {
     pub epoch_index: u64,
     pub sub_epoch_index: u64,
     pub epoch_seed: [u8; 32],
+
+    pub retire_per_epoch_limit: u64,
+
+    // epoch -> list of ticket ids that begin retiring this epoch
+    pub retire_schedule: BTreeMap<u64, Vec<u64>>,
+
+    // epoch -> list of ticket ids that become DEAD this epoch
+    pub retire_finalize: BTreeMap<u64, Vec<u64>>,
 }

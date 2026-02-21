@@ -1,12 +1,29 @@
 use crate::state::chain_state::ChainState;
 use crate::state::bucket_ops::{any_active_bucket, any_muted_bucket, move_all_validator_tickets_to_bucket};
+use crate::types::ticket::TicketState;
 use crate::types::validator::ValidatorState;
+use crate::state::retirement_ops::{begin_retire_for_epoch, finalize_retire_for_epoch};
 
 pub fn process_epoch_transition(state: &mut ChainState) {
     state.epoch_index += 1;
+    println!("=== EPOCH TRANSITION → {} ===", state.epoch_index);
+    
+    println!("Processing retire begin for epoch {}", state.epoch_index);
+    begin_retire_for_epoch(state, state.epoch_index);
+    finalize_retire_for_epoch(state, state.epoch_index);
+
+    for (validator_id, val) in state.validators.iter_mut() {
+        let active_ticket_count = state.tickets.values()
+            .filter(|t| t.owner == *validator_id && t.state == TicketState::Active)
+            .count();
+
+        if active_ticket_count == 0 && val.state == ValidatorState::Active {
+            val.state = ValidatorState::Inactive;
+        }
+    }
 
     let required_min = |vault_balance: u128, initial_bond: u128| -> bool {
-        // placeholder: minimum is the initial bond (your current rule)
+        // placeholder: minimum is the initial bond
         vault_balance >= initial_bond
     };
 

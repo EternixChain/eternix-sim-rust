@@ -100,7 +100,6 @@ Core validator lifecycle logic implemented.
 Next steps include:
 - Reward distribution modeling
 - Inflation simulation
-- Ticket retirement mechanics
 - Long-horizon economic testing
 
 ---

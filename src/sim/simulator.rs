@@ -18,8 +18,8 @@ impl Simulator {
         let _slot_start_ms = self.clock.slot_start_ms;
 
         let proposals = vec![
+            Proposal { proposer_id: 1, block_id: slot_index },
             Proposal { proposer_id: 2, block_id: slot_index },
-            Proposal { proposer_id: 2, block_id: slot_index + 999_999 }, // second distinct block => double-sign
         ];
 
         let block = process_slot(
