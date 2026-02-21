@@ -3,6 +3,7 @@ use crate::types::block::Block;
 use crate::sim::clock::SimClock;
 use crate::consensus::slot::process_slot;
 use crate::consensus::epoch::process_epoch_transition;
+use crate::types::proposal::Proposal;
 
 pub struct Simulator {
     pub clock: SimClock,
@@ -13,17 +14,19 @@ pub struct Simulator {
 
 impl Simulator {
     pub fn run_one_slot(&mut self) -> Block {
-        let _slot_index = self.clock.slot_index;
+        let slot_index = self.clock.slot_index;
         let _slot_start_ms = self.clock.slot_start_ms;
 
-        // V2 always tries proposing
-        let buffered_proposal: Option<u64> = Some(2);
+        let proposals = vec![
+            Proposal { proposer_id: 2, block_id: slot_index },
+            Proposal { proposer_id: 2, block_id: slot_index + 999_999 }, // second distinct block => double-sign
+        ];
 
         let block = process_slot(
             &mut self.state,
             self.clock.slot_index,
             self.clock.slot_start_ms,
-            buffered_proposal,
+            &proposals,
         );
 
         self.blocks.push(block.clone());

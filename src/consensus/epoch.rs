@@ -21,6 +21,10 @@ pub fn process_epoch_transition(state: &mut ChainState) {
             (v.state, v.cooldown_until_epoch, v.vault_balance, v.initial_bond)
         };
 
+        if st == ValidatorState::Jailed {
+            continue;
+        }
+        
         if st == ValidatorState::PunishedCooldown {
             if let Some(until_epoch) = until {
                 if state.epoch_index >= until_epoch {

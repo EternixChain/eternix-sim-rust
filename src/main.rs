@@ -134,13 +134,12 @@ fn main() {
 
     // --- Run a few slots ---
     for _ in 0..50 {
-        let current_slot = sim.clock.slot_index;
+//        let current_slot = sim.clock.slot_index;
 
-        //Inject refill at specific block
-        if current_slot == 25 {
-            println!(">>> Injecting refill at slot {}", current_slot);
-            on_vault_refill(&mut sim.state, 1, 50_000u128);
-        }
+        // Inject at specific block
+//        if current_slot == 25 {
+//            on_vault_refill(&mut sim.state, 1, 50_000u128);
+//        }
 
         let block = sim.run_one_slot();
 
