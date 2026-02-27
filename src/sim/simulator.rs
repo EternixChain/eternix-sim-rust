@@ -19,6 +19,7 @@ impl Simulator {
 
         let proposals = vec![
             Proposal { proposer_id: 1, block_id: slot_index },
+            Proposal { proposer_id: 1, block_id: slot_index + 9999 },
             Proposal { proposer_id: 2, block_id: slot_index },
         ];
 

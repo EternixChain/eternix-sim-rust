@@ -1,6 +1,7 @@
 use crate::state::bucket_ops::{any_active_bucket, move_all_validator_tickets_to_bucket};
 use crate::types::validator::ValidatorState;
 use crate::state::chain_state::ChainState;
+use crate::state::bucket_ops::force_dead_all_validator_tickets;
 
 pub fn on_vault_refill(state: &mut ChainState, validator_id: u64, amount: u128) {
     let v = state.validators.get_mut(&validator_id).unwrap();
@@ -13,4 +14,14 @@ pub fn on_vault_refill(state: &mut ChainState, validator_id: u64, amount: u128) 
         let active_bucket = any_active_bucket(state);
         move_all_validator_tickets_to_bucket(state, validator_id, active_bucket);
     }
+}
+
+pub fn jail_validator(state: &mut ChainState, validator_id: u64) {
+    let val = state.validators.get_mut(&validator_id).unwrap();
+
+    val.state = ValidatorState::Jailed;
+    val.cooldown_until_epoch = None;
+
+    // Tickets become dead immediately
+    force_dead_all_validator_tickets(state, validator_id);
 }

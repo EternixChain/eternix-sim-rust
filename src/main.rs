@@ -7,7 +7,7 @@ use eternix_sim::types::validator::{Validator, ValidatorState};
 use eternix_sim::types::ticket::Ticket;
 use eternix_sim::types::bucket::Bucket;
 use eternix_sim::types::ticket::TicketState;
-use eternix_sim::state::retirement_ops::request_ticket_retire;
+// use eternix_sim::state::retirement_ops::request_ticket_retire;
 // use eternix_sim::state::validator_ops::{on_vault_refill};
 
 fn main() {
@@ -21,7 +21,7 @@ fn main() {
         Validator {
             id: validator1_id,
             state: ValidatorState::Active,
-            vault_balance: 1_000_000,
+            vault_balance: 1_000_000_000,
             initial_bond: 1_000_000,
             miss_counter: 0,
             double_sign_offenses: 0,
@@ -144,11 +144,11 @@ fn main() {
         epoch_len_slots: 10,
     };
 
-    request_ticket_retire(&mut sim.state, 1, vec![1]);
-    println!("{:?}", sim.state.retire_schedule);
+    // request_ticket_retire(&mut sim.state, 1, vec![1]);
+    // println!("{:?}", sim.state.retire_schedule);
 
     // --- Run a few slots ---
-    for _ in 0..50 {
+    for _ in 0..500 {
 //        let current_slot = sim.clock.slot_index;
 
         // Inject at specific block

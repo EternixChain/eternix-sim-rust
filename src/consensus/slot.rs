@@ -4,6 +4,7 @@ use crate::consensus::leader_selection::select_leader;
 use crate::state::bucket_ops::{any_muted_bucket, move_all_validator_tickets_to_bucket};
 use crate::types::validator::ValidatorState;
 use crate::types::proposal::Proposal;
+use crate::state::validator_ops::jail_validator;
 
 pub fn process_slot(
     state: &mut ChainState,
@@ -143,7 +144,7 @@ fn apply_double_sign_punishment(state: &mut ChainState, validator_id: u64) {
             move_all_validator_tickets_to_bucket(state, validator_id, muted);
         }
         2 => {
-            // 75% slash => keep 25%
+            // 75% slash
             val.vault_balance /= 4;
             println!(
                 "!!! DOUBLE-SIGN: validator {} offense #2 => 75% slash, 5 epoch mute. New vault={} !!!",
@@ -157,19 +158,14 @@ fn apply_double_sign_punishment(state: &mut ChainState, validator_id: u64) {
             move_all_validator_tickets_to_bucket(state, validator_id, muted);
         }
         _ => {
-            // 100% slash + jail forever
+            // 100% slash + jail
             val.vault_balance = 0;
-            val.state = ValidatorState::Jailed;
-            val.cooldown_until_epoch = None;
+            jail_validator(state, validator_id);
 
             println!(
                 "!!!!! DOUBLE-SIGN: validator {} offense #{} => 100% slash + JAILED. New vault=0 !!!!!",
                 validator_id, offense
             );
-
-            // Move tickets to DEAD bucket
-            let dead = state.dead_bucket_id;
-            move_all_validator_tickets_to_bucket(state, validator_id, dead);
         }
     }
 }

@@ -1,4 +1,5 @@
 use crate::state::chain_state::ChainState;
+use crate::types::ticket::TicketState;
 
 /// Move a ticket between buckets.
 /// This is the ONLY place tickets are allowed to change buckets.
@@ -55,6 +56,33 @@ pub fn move_all_validator_tickets_to_bucket(
         let from = state.tickets.get(&tid).unwrap().bucket;
         if from != to_bucket {
             move_ticket(state, tid, from, to_bucket);
+        }
+    }
+}
+
+pub fn force_dead_all_validator_tickets(state: &mut ChainState, validator_id: u64) {
+    let dead_bucket = state.dead_bucket_id;
+
+    // collect first to avoid borrow issues
+    let ticket_ids: Vec<u64> = state
+        .tickets
+        .values()
+        .filter(|t| t.owner == validator_id)
+        .map(|t| t.id)
+        .collect();
+
+    for tid in ticket_ids {
+        let t = state.tickets.get_mut(&tid).unwrap();
+
+        // mark dead
+        t.state = TicketState::Dead;
+        t.retire_requested_epoch = t.retire_requested_epoch.or(Some(state.epoch_index));
+        t.retire_effective_epoch = Some(state.epoch_index);
+
+        // move bucket
+        let from = t.bucket;
+        if from != dead_bucket {
+            move_ticket(state, tid, from, dead_bucket);
         }
     }
 }
