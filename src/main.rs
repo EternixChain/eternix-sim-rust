@@ -10,6 +10,8 @@ use eternix_sim::types::ticket::TicketState;
 // use eternix_sim::state::retirement_ops::request_ticket_retire;
 // use eternix_sim::state::validator_ops::{on_vault_refill};
 
+const INITIAL_SUPPLY: u128 = 100_000_000;
+
 fn main() {
     // --- Genesis validator ---
     let validator1_id = 1u64;
@@ -114,6 +116,9 @@ fn main() {
     muted_bucket_ids.insert(muted_bucket_id);
 
     let state = ChainState {
+        total_supply: INITIAL_SUPPLY,
+        block_reward: 1000, //TEMPORARY
+
         validators,
         tickets,
         buckets,
@@ -148,7 +153,7 @@ fn main() {
     // println!("{:?}", sim.state.retire_schedule);
 
     // --- Run a few slots ---
-    for _ in 0..500 {
+    for _ in 0..100 {
 //        let current_slot = sim.clock.slot_index;
 
         // Inject at specific block
@@ -165,7 +170,7 @@ fn main() {
         let v2 = sim.state.validators.get(&2).unwrap();
 
         println!(
-            "Block {} | proposer: {:?} | v1: {:?} miss={} vault={} | v2: {:?} miss={} vault={}",
+            "Block {} | proposer: {:?} | v1: {:?} miss={} vault={} | v2: {:?} miss={} vault={} | total_supply={}",
             block.slot_index,
             block.proposer,
             v1.state,
@@ -174,6 +179,7 @@ fn main() {
             v2.state,
             v2.miss_counter,
             v2.vault_balance,
+            sim.state.total_supply,
         );
     }
 

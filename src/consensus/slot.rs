@@ -68,6 +68,12 @@ pub fn process_slot(
 
         let val = state.validators.get_mut(&leader).unwrap();
         val.miss_counter = val.miss_counter.saturating_sub(1);
+
+        if let Some(pid) = proposer {
+            let val = state.validators.get_mut(&pid).unwrap();
+            val.vault_balance += state.block_reward;
+            state.total_supply += state.block_reward;
+        }
     } else {
         //Protocol-produced block (miss)
         proposer = None;

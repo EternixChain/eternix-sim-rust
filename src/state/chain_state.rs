@@ -4,6 +4,9 @@ use crate::types::{validator::Validator, ticket::Ticket, bucket::Bucket};
 
 #[derive(Debug)]
 pub struct ChainState {
+    pub total_supply: u128,
+    pub block_reward: u128,
+
     pub validators: HashMap<u64, Validator>,
     pub tickets: HashMap<u64, Ticket>,
 
