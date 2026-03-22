@@ -4,3 +4,8 @@ pub struct Block {
     pub timestamp_ms: u64,
     pub proposer: Option<u64>, // None = protocol block
 }
+
+#[derive(Debug, Clone)]
+pub struct SubEpochBlockRecord {
+    pub proposer: Option<u64>,
+}

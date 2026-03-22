@@ -1,11 +1,17 @@
 use std::collections::{HashMap, HashSet, BTreeMap};
 
 use crate::types::{validator::Validator, ticket::Ticket, bucket::Bucket};
+use crate::types::block::SubEpochBlockRecord;
 
 #[derive(Debug)]
 pub struct ChainState {
     pub total_supply: u128,
     pub block_reward: u128,
+
+    pub burn_this_sub_epoch: u128,
+    pub blocks_this_sub_epoch: Vec<SubEpochBlockRecord>,
+    pub k_numerator: u128,
+    pub k_denominator: u128,
 
     pub validators: HashMap<u64, Validator>,
     pub tickets: HashMap<u64, Ticket>,

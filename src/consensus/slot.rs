@@ -5,6 +5,7 @@ use crate::state::bucket_ops::{any_muted_bucket, move_all_validator_tickets_to_b
 use crate::types::validator::ValidatorState;
 use crate::types::proposal::Proposal;
 use crate::state::validator_ops::jail_validator;
+use crate::types::block::SubEpochBlockRecord;
 
 pub fn process_slot(
     state: &mut ChainState,
@@ -26,6 +27,11 @@ pub fn process_slot(
         });
 
     if !has_eligible_tickets {
+        // Record slot outcome for burn-offset accounting
+        state.blocks_this_sub_epoch.push(SubEpochBlockRecord {
+            proposer: None,
+        });
+
         return Block {
             slot_index,
             timestamp_ms: slot_start_ms + 3_000,
@@ -51,6 +57,11 @@ pub fn process_slot(
 
     if leader_double_signed {
         apply_double_sign_punishment(state, leader);
+
+        // Record slot outcome for burn-offset accounting
+        state.blocks_this_sub_epoch.push(SubEpochBlockRecord {
+            proposer: None,
+        });
 
         // Protocol-produced block
         return Block {
@@ -87,6 +98,11 @@ pub fn process_slot(
         }
     }
 
+    // Record slot outcome for burn-offset accounting
+    state.blocks_this_sub_epoch.push(SubEpochBlockRecord {
+        proposer,
+    });
+
     // Publish block at slot end
     Block {
         slot_index,
@@ -113,6 +129,8 @@ fn apply_liveness_slash(state: &mut ChainState, validator_id: u64) {
     // 5% slash
     let slash_amount = val.vault_balance / 20;
     val.vault_balance -= slash_amount;
+    state.total_supply -= slash_amount;
+    state.burn_this_sub_epoch += slash_amount;
 
     println!(
         "!!!  LIVENESS SLASH: validator {} slashed by 5%, new vault = {} !!!",
@@ -137,23 +155,11 @@ fn apply_double_sign_punishment(state: &mut ChainState, validator_id: u64) {
     match offense {
         1 => {
             // 50% slash
+            state.burn_this_sub_epoch += val.vault_balance / 2;
+            state.total_supply -= val.vault_balance / 2;
             val.vault_balance /= 2;
             println!(
                 "!!! DOUBLE-SIGN: validator {} offense #1 => 50% slash, 2 epoch mute. New vault={} !!!",
-                validator_id, val.vault_balance
-            );
-
-            val.state = ValidatorState::PunishedCooldown;
-            val.cooldown_until_epoch = Some(state.epoch_index + 2 + 1);
-
-            let muted = any_muted_bucket(state);
-            move_all_validator_tickets_to_bucket(state, validator_id, muted);
-        }
-        2 => {
-            // 75% slash
-            val.vault_balance /= 4;
-            println!(
-                "!!! DOUBLE-SIGN: validator {} offense #2 => 75% slash, 5 epoch mute. New vault={} !!!",
                 validator_id, val.vault_balance
             );
 
@@ -163,8 +169,26 @@ fn apply_double_sign_punishment(state: &mut ChainState, validator_id: u64) {
             let muted = any_muted_bucket(state);
             move_all_validator_tickets_to_bucket(state, validator_id, muted);
         }
+        2 => {
+            // 75% slash
+            state.burn_this_sub_epoch += val.vault_balance / 4;
+            state.total_supply -= val.vault_balance / 4;
+            val.vault_balance /= 4;
+            println!(
+                "!!! DOUBLE-SIGN: validator {} offense #2 => 75% slash, 5 epoch mute. New vault={} !!!",
+                validator_id, val.vault_balance
+            );
+
+            val.state = ValidatorState::PunishedCooldown;
+            val.cooldown_until_epoch = Some(state.epoch_index + 10 + 1);
+
+            let muted = any_muted_bucket(state);
+            move_all_validator_tickets_to_bucket(state, validator_id, muted);
+        }
         _ => {
             // 100% slash + jail
+            state.burn_this_sub_epoch += val.vault_balance;
+            state.total_supply -= val.vault_balance;
             val.vault_balance = 0;
             jail_validator(state, validator_id);
 
