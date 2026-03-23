@@ -120,7 +120,7 @@ fn should_liveness_slash(prev: u32, now: u32) -> bool {
         return true;
     }
 
-    now > 5 && (now - 5) % 100 == 0
+    now > 5 && (now - 5) % 10 == 0
 }
 
 fn apply_liveness_slash(state: &mut ChainState, validator_id: u64) {
