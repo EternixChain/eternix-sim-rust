@@ -39,7 +39,7 @@ impl Simulator {
         self.clock.slot_start_ms += 3_000;
         self.clock.now_ms = self.clock.slot_start_ms;
 
-        if self.clock.slot_index % self.sub_epoch_len_slots == 0 {
+        if (self.clock.slot_index + 1) % self.sub_epoch_len_slots == 0 {
             process_sub_epoch_transition(&mut self.state);
         }
 

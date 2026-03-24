@@ -159,7 +159,7 @@ fn apply_double_sign_punishment(state: &mut ChainState, validator_id: u64) {
             state.total_supply -= val.vault_balance / 2;
             val.vault_balance /= 2;
             println!(
-                "!!! DOUBLE-SIGN: validator {} offense #1 => 50% slash, 2 epoch mute. New vault={} !!!",
+                "!!! DOUBLE-SIGN: validator {} offense #1 => 50% slash, 5 epoch mute. New vault={} !!!",
                 validator_id, val.vault_balance
             );
 
@@ -175,7 +175,7 @@ fn apply_double_sign_punishment(state: &mut ChainState, validator_id: u64) {
             state.total_supply -= val.vault_balance / 4;
             val.vault_balance /= 4;
             println!(
-                "!!! DOUBLE-SIGN: validator {} offense #2 => 75% slash, 5 epoch mute. New vault={} !!!",
+                "!!! DOUBLE-SIGN: validator {} offense #2 => 75% slash, 10 epoch mute. New vault={} !!!",
                 validator_id, val.vault_balance
             );
 
