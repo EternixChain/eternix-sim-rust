@@ -43,7 +43,7 @@ impl Simulator {
             process_sub_epoch_transition(&mut self.state);
         }
 
-        if self.clock.slot_index % self.epoch_len_slots == 0 {
+        if (self.clock.slot_index + 1) % self.epoch_len_slots == 0 {
             process_epoch_transition(&mut self.state);
         }
 

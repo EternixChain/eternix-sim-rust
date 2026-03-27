@@ -19,10 +19,12 @@ pub fn process_sub_epoch_transition(state: &mut ChainState) {
         state.burn_this_sub_epoch
     );
 
+/*
     println!("--- SUB EPOCH BLOCKS ---");
     for (i, b) in state.blocks_this_sub_epoch.iter().enumerate() {
         println!("{}: {:?}", i, b.proposer);
     }
+*/
 
     if validator_blocks > 0 {
         let bonus_per_block = offset_pool / validator_blocks as u128;

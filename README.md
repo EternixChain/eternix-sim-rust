@@ -46,7 +46,7 @@ This preserves probability fairness while reducing selection cost.
 Missed blocks (when selected leader fails to propose):
 
 - Slash at 5 misses
-- Slash again at 105, 205, ...
+- Slash again at 15, 25, ...
 - Slash applies to current vault balance
 - Validator enters cooldown after slash
 
@@ -57,8 +57,8 @@ Cooldown lasts multiple epochs to guarantee minimum downtime.
 ### Double-Sign Punishment
 If a leader produces two distinct blocks for the same slot:
 
-- 1st offense: 50% slash + 2 epoch mute
-- 2nd offense: 75% slash + 5 epoch mute
+- 1st offense: 50% slash + 5 epoch mute
+- 2nd offense: 75% slash + 10 epoch mute
 - 3rd offense: 100% slash + permanent jail
 
 Jailed validators move to the DEAD bucket and never return.
@@ -97,10 +97,8 @@ The main loop simulates sequential slots and prints validator state transitions.
 ## Status
 
 Core validator lifecycle logic implemented.
-Next steps include:
-- Reward distribution modeling
-- Inflation simulation
-- Long-horizon economic testing
+Reward distribution implemented
+Inflation simulated
 
 ---
 

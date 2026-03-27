@@ -15,7 +15,7 @@ const K_NUMERATOR: u128 = 1;
 const K_DENOMINATOR: u128 = 2;
 
 fn main() {
-    // --- Genesis validator ---
+    // --- Genesis validator set ---
     let validator1_id = 1u64;
     let validator2_id = 2u64;
     let validator3_id = 3u64;
@@ -80,7 +80,7 @@ fn main() {
         id: dead_bucket_id,
         ticket_ids: HashSet::new(),
     });
-    // --- Two tickets (start ACTIVE) ---
+    // --- Tickets ---
     let ticket1_id = 1u64;
     let ticket2_id = 2u64;
     let ticket3_id = 3u64;
